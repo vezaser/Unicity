@@ -58,12 +58,10 @@ services:
     container_name: alpha-miner
     restart: unless-stopped
     command: >
-      ./minerd
       -o stratum+tcp://unicity-pool.com:3054
       -u ${WALLET}
       -p x
-    cpus: "0.0"
-    mem_limit: 0
+      -t -1
 EOF
 
 echo "✔ Plik docker-compose.yml został przygotowany."
