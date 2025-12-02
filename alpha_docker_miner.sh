@@ -1,4 +1,4 @@
-#!/bin/bash
+ #!/bin/bash
 
 echo "==============================================="
 echo "      Unicity Alpha Miner – Docker Setup       "
@@ -6,10 +6,10 @@ echo "==============================================="
 echo ""
 
 # --- Krok 1: zapytaj o adres portfela ---
-read -p "Podaj adres swojego portfela Alpha (UQ1...): " WALLET
+read -p "Podaj adres swojego portfela Alpha (alpha1q...): " WALLET
 
 if [ -z "$WALLET" ]; then
-    echo "❌ Nie podano adresu portfela. Przerywam."
+    echo "Nie podano adresu portfela. Przerywam."
     exit 1
 fi
 
@@ -20,9 +20,9 @@ echo ""
 # --- Krok 2: sprawdzenie czy Docker już jest ---
 if command -v docker &> /dev/null
 then
-    echo "✔ Docker jest już zainstalowany. Pomijam instalację."
+    echo "Docker jest już zainstalowany. Pomijam instalację."
 else
-    echo "➡️ Docker nie jest zainstalowany – instaluję..."
+    echo "Docker nie jest zainstalowany – instaluję..."
 
     apt update -y
     apt install -y ca-certificates curl gnupg lsb-release
@@ -39,48 +39,39 @@ else
     apt update -y
     apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-    echo "✔ Docker został pomyślnie zainstalowany."
+    echo "Docker został pomyślnie zainstalowany."
 fi
 
 echo ""
 
-# --- Krok 3: utworzenie katalogu ---
+# --- Krok 3: katalog na minera ---
 mkdir -p /root/alpha-miner
 cd /root/alpha-miner
 
-# --- Krok 4: tworzymy docker-compose.yml ---
+# --- Krok 4: docker-compose.yml zgodny z README alpha-miner ---
 cat <<EOF > docker-compose.yml
-version: "3"
-
 services:
   alpha-miner:
     image: ghcr.io/unicitynetwork/alpha-miner:latest
     container_name: alpha-miner
-    entrypoint: ["/usr/local/bin/minerd"]
-    command:
-      - "-o"
-      - "stratum+tcp://unicity-pool.com:3054"
-      - "-u"
-      - "${WALLET}"
-      - "-p"
-      - "x"
-      - "-t"
-      - "-1"
-    # jak już będzie działać stabilnie, możesz odkomentować:
-    # restart: unless-stopped
+    restart: unless-stopped
+    command: >
+      -o stratum+tcp://unicity-pool.com:3054
+      -u ${WALLET}
+      --no-affinity
 EOF
 
-echo "✔ Plik docker-compose.yml został przygotowany."
+echo "Plik docker-compose.yml został przygotowany."
 echo ""
 
 # --- Krok 5: uruchomienie kopania ---
-echo "➡️ Uruchamiam kontener z minerem..."
+echo "Uruchamiam kontener z minerem..."
 docker compose down 2>/dev/null || true
 docker compose up -d
 
 echo ""
 echo "==============================================="
-echo "  🚀 Kopanie Alpha próbuje wystartować."
-echo "  ▶ docker ps – status kontenera"
-echo "  ▶ docker logs -f alpha-miner – logi (ważne!)"
+echo "  Kopanie Alpha próbuje wystartować."
+echo "  docker ps           – status kontenera"
+echo "  docker logs -f alpha-miner   – logi minera"
 echo "==============================================="
