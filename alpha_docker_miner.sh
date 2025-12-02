@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "==============================================="
-echo "      Unicity Alpha Miner – Docker Setup        "
+echo "      Unicity Alpha Miner – Docker Setup       "
 echo "==============================================="
 echo ""
 
@@ -56,12 +56,18 @@ services:
   alpha-miner:
     image: ghcr.io/unicitynetwork/alpha-miner:latest
     container_name: alpha-miner
-    restart: unless-stopped
-    command: >
-      -o stratum+tcp://unicity-pool.com:3054
-      -u ${WALLET}
-      -p x
-      -t -1
+    entrypoint: ["/usr/local/bin/minerd"]
+    command:
+      - "-o"
+      - "stratum+tcp://unicity-pool.com:3054"
+      - "-u"
+      - "${WALLET}"
+      - "-p"
+      - "x"
+      - "-t"
+      - "-1"
+    # jak już będzie działać stabilnie, możesz odkomentować:
+    # restart: unless-stopped
 EOF
 
 echo "✔ Plik docker-compose.yml został przygotowany."
@@ -69,11 +75,12 @@ echo ""
 
 # --- Krok 5: uruchomienie kopania ---
 echo "➡️ Uruchamiam kontener z minerem..."
+docker compose down 2>/dev/null || true
 docker compose up -d
 
 echo ""
 echo "==============================================="
-echo "  🚀 Kopanie Alpha działa w Dockerze!"
-echo "  ▶ docker ps – lista kontenerów"
-echo "  ▶ docker logs -f alpha-miner – logi"
+echo "  🚀 Kopanie Alpha próbuje wystartować."
+echo "  ▶ docker ps – status kontenera"
+echo "  ▶ docker logs -f alpha-miner – logi (ważne!)"
 echo "==============================================="
