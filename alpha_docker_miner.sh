@@ -17,24 +17,31 @@ echo ""
 echo "Używam portfela: $WALLET"
 echo ""
 
-# --- Krok 2: instalacja Dockera ---
-echo "➡️ Instaluję Docker..."
-apt update -y
-apt install -y ca-certificates curl gnupg lsb-release
+# --- Krok 2: sprawdzenie czy Docker już jest ---
+if command -v docker &> /dev/null
+then
+    echo "✔ Docker jest już zainstalowany. Pomijam instalację."
+else
+    echo "➡️ Docker nie jest zainstalowany – instaluję..."
 
-install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.gpg
-chmod a+r /etc/apt/keyrings/docker.gpg
+    apt update -y
+    apt install -y ca-certificates curl gnupg lsb-release
 
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-  tee /etc/apt/sources.list.d/docker.list > /dev/null
+    install -m 0755 -d /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.gpg
+    chmod a+r /etc/apt/keyrings/docker.gpg
 
-apt update -y
-apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+      $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+      tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-echo "➡️ Docker zainstalowany."
+    apt update -y
+    apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+    echo "✔ Docker został pomyślnie zainstalowany."
+fi
+
 echo ""
 
 # --- Krok 3: utworzenie katalogu ---
@@ -59,16 +66,16 @@ services:
     mem_limit: 0
 EOF
 
-echo "➡️ Plik docker-compose.yml został utworzony."
+echo "✔ Plik docker-compose.yml został przygotowany."
 echo ""
 
 # --- Krok 5: uruchomienie kopania ---
-echo "➡️ Uruchamiam kopanie w Dockerze..."
+echo "➡️ Uruchamiam kontener z minerem..."
 docker compose up -d
 
 echo ""
 echo "==============================================="
-echo "  🚀 Kopanie Alpha działa w tle w Dockerze!"
-echo "  ▶️ Sprawdź status: docker ps"
-echo "  ▶️ Logi minera: docker logs -f alpha-miner"
+echo "  🚀 Kopanie Alpha działa w Dockerze!"
+echo "  ▶ docker ps – lista kontenerów"
+echo "  ▶ docker logs -f alpha-miner – logi"
 echo "==============================================="
